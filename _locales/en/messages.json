@@ -1,37 +1,152 @@
 {
-  "ext_description": { "message": "Autofill credentials and TOTP codes from your self-hosted APS Vault. Quick search palette on Ctrl/Cmd+Shift+L." },
-  "cmd_open_palette": { "message": "Open the APS Vault palette" },
-  "status_loading": { "message": "…" },
-  "status_no_url": { "message": "Vault URL is not set — open the extension options." },
-  "status_not_initialized": { "message": "Vault is not initialised — open it in a tab first." },
-  "status_unlocked": { "message": "Vault unlocked" },
-  "status_locked": { "message": "Vault locked" },
-  "status_error": { "message": "Error: $MSG$", "placeholders": { "msg": { "content": "$1" } } },
-  "ph_master": { "message": "Master password" },
-  "ph_totp": { "message": "TOTP code (if 2FA is enabled)" },
-  "btn_unlock": { "message": "Unlock" },
-  "btn_palette": { "message": "Open palette" },
-  "btn_open_vault": { "message": "Open vault" },
-  "btn_lock": { "message": "Lock" },
-  "btn_options": { "message": "Settings" },
-  "hint_hotkey": { "message": "Global hotkey: " },
-  "palette_unavailable": { "message": "The palette cannot open on this page (browser pages are not scriptable)." },
-  "opt_title": { "message": "APS Vault — settings" },
-  "opt_url_label": { "message": "Vault URL" },
-  "opt_url_help": { "message": "Address of your APS Vault, e.g. https://vault.example.com. Ask the administrator to add this extension's origin (chrome-extension://<id>) to VAULT_ALLOWED_ORIGINS." },
-  "opt_autolock_label": { "message": "Auto-lock after (minutes)" },
-  "opt_save": { "message": "Save" },
-  "opt_saved": { "message": "Saved" },
-  "opt_bad_url": { "message": "URL must start with https:// (http:// only for localhost)" },
-  "opt_how": { "message": "How it works: unlock from the popup with the master password; the extension keeps the session and fills login, password and TOTP into forms whose address matches a secret's URL. Hotkey Ctrl/Cmd+Shift+L opens a search palette on any page." },
-  "opt_extension_id": { "message": "This extension's origin (add to VAULT_ALLOWED_ORIGINS):" },
-  "cs_icon_title": { "message": "APS Vault: autofill" },
-  "cs_no_matches": { "message": "No secrets for this site — press Ctrl/Cmd+Shift+L to search" },
-  "cs_filled": { "message": "Filled: $NAME$", "placeholders": { "name": { "content": "$1" } } },
-  "cs_error": { "message": "Error: $MSG$", "placeholders": { "msg": { "content": "$1" } } },
-  "cs_vault_error": { "message": "Vault: $MSG$", "placeholders": { "msg": { "content": "$1" } } },
-  "cs_search_ph": { "message": "Search secrets… (Esc to close)" },
-  "cs_copied": { "message": "$NAME$ copied (clears in 30 s)", "placeholders": { "name": { "content": "$1" } } },
-  "cs_unlock_title": { "message": "Unlock APS Vault" },
-  "cs_unlocked": { "message": "Vault unlocked" }
+  "ext_description": {
+    "message": "Autofill credentials and TOTP codes from your self-hosted APS Vault. Quick search palette on Ctrl/Cmd+Shift+L."
+  },
+  "cmd_open_palette": {
+    "message": "Open APS Vault search"
+  },
+  "status_loading": {
+    "message": "…"
+  },
+  "status_no_url": {
+    "message": "Vault URL is not set — open the extension options."
+  },
+  "status_not_initialized": {
+    "message": "Vault is not initialised — open it in a tab first."
+  },
+  "status_unlocked": {
+    "message": "Vault unlocked"
+  },
+  "status_locked": {
+    "message": "Vault locked"
+  },
+  "status_error": {
+    "message": "Error: $MSG$",
+    "placeholders": {
+      "msg": {
+        "content": "$1"
+      }
+    }
+  },
+  "ph_master": {
+    "message": "Master password"
+  },
+  "ph_totp": {
+    "message": "TOTP code (if 2FA is enabled)"
+  },
+  "btn_unlock": {
+    "message": "Unlock"
+  },
+  "btn_palette": {
+    "message": "Open palette"
+  },
+  "btn_open_vault": {
+    "message": "Open vault"
+  },
+  "btn_lock": {
+    "message": "Lock"
+  },
+  "btn_options": {
+    "message": "Settings"
+  },
+  "hint_hotkey": {
+    "message": "Global hotkey: "
+  },
+  "palette_unavailable": {
+    "message": "The palette cannot open on this page (browser pages are not scriptable)."
+  },
+  "opt_title": {
+    "message": "APS Vault — settings"
+  },
+  "opt_url_label": {
+    "message": "Vault URL"
+  },
+  "opt_url_help": {
+    "message": "Address of your APS Vault, e.g. https://vault.example.com. Ask the administrator to add this extension's origin (chrome-extension://<id>) to VAULT_ALLOWED_ORIGINS."
+  },
+  "opt_autolock_label": {
+    "message": "Auto-lock after (minutes)"
+  },
+  "opt_save": {
+    "message": "Save"
+  },
+  "opt_saved": {
+    "message": "Saved"
+  },
+  "opt_bad_url": {
+    "message": "URL must start with https:// (http:// only for localhost)"
+  },
+  "opt_how": {
+    "message": "How it works: unlock from the popup with the master password; the extension keeps the session and fills login, password and TOTP into forms whose address matches a secret's URL. Hotkey Ctrl/Cmd+Shift+L opens a search palette on any page."
+  },
+  "opt_extension_id": {
+    "message": "This extension's origin (add to VAULT_ALLOWED_ORIGINS):"
+  },
+  "cs_icon_title": {
+    "message": "APS Vault: autofill"
+  },
+  "cs_no_matches": {
+    "message": "No secrets for this site — press Ctrl/Cmd+Shift+L to search"
+  },
+  "cs_filled": {
+    "message": "Filled: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "cs_error": {
+    "message": "Error: $MSG$",
+    "placeholders": {
+      "msg": {
+        "content": "$1"
+      }
+    }
+  },
+  "cs_vault_error": {
+    "message": "Vault: $MSG$",
+    "placeholders": {
+      "msg": {
+        "content": "$1"
+      }
+    }
+  },
+  "cs_search_ph": {
+    "message": "Search secrets… (Esc to close)"
+  },
+  "cs_copied": {
+    "message": "$NAME$ copied (clears in 30 s)",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "cs_unlock_title": {
+    "message": "Unlock APS Vault"
+  },
+  "cs_unlocked": {
+    "message": "Vault unlocked"
+  },
+  "cs_locked_use_popup": {
+    "message": "APS Vault is locked — unlock it in the extension window (toolbar icon)"
+  },
+  "cs_https_only": {
+    "message": "Autofill works on https pages only"
+  },
+  "ph_search": {
+    "message": "Search secrets…"
+  },
+  "search_empty": {
+    "message": "Nothing found"
+  },
+  "copied": {
+    "message": "Copied: $NAME$ (clears in 30 s)",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  }
 }

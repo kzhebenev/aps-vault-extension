@@ -16,6 +16,11 @@
     .status-ok { color: #10b981; } .status-locked { color: #f59e0b; }
     .hint { font-size: 11px; color: #64748b; margin-top: 6px; text-align: center; }
     .hint kbd { background: #1e2435; border: 1px solid #334155; padding: 1px 4px; border-radius: 3px; font-size: 10px; }
+    #results { max-height: 260px; overflow-y: auto; margin-top: 6px; }
+    .row { padding: 7px 8px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; gap: 8px; font-size: 12px; }
+    .row:hover, .row.sel { background: rgba(59,130,246,.15); color: #93c5fd; }
+    .row .meta { color: #64748b; font-size: 11px; }
+    .empty { color: #64748b; font-size: 12px; padding: 8px; text-align: center; }
   </style>
 </head>
 <body>
@@ -30,7 +35,9 @@
     <button id="btn-unlock" data-i18n="btn_unlock"></button>
   </div>
   <div id="form-unlocked" style="display:none">
-    <button id="btn-palette" data-i18n="btn_palette"></button>
+    <!-- 0.3.0: search and copy live here, in the extension's own page — not in the web page -->
+    <input id="search" type="text" data-i18n-ph="ph_search" autocomplete="off">
+    <div id="results"></div>
     <button id="btn-vault" data-i18n="btn_open_vault"></button>
     <button id="btn-lock" class="btn-lock" data-i18n="btn_lock"></button>
   </div>

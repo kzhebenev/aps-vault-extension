@@ -1,37 +1,152 @@
 {
-  "ext_description": { "message": "Автозаполнение учётных данных и TOTP-кодов из вашего APS Vault. Палитра поиска по Ctrl/Cmd+Shift+L." },
-  "cmd_open_palette": { "message": "Открыть палитру APS Vault" },
-  "status_loading": { "message": "…" },
-  "status_no_url": { "message": "Адрес vault не задан — откройте настройки расширения." },
-  "status_not_initialized": { "message": "Vault не инициализирован — сначала откройте его во вкладке." },
-  "status_unlocked": { "message": "Vault разблокирован" },
-  "status_locked": { "message": "Vault заблокирован" },
-  "status_error": { "message": "Ошибка: $MSG$", "placeholders": { "msg": { "content": "$1" } } },
-  "ph_master": { "message": "Мастер-пароль" },
-  "ph_totp": { "message": "TOTP-код (если включена 2FA)" },
-  "btn_unlock": { "message": "Разблокировать" },
-  "btn_palette": { "message": "Открыть палитру" },
-  "btn_open_vault": { "message": "Открыть vault" },
-  "btn_lock": { "message": "Заблокировать" },
-  "btn_options": { "message": "Настройки" },
-  "hint_hotkey": { "message": "Горячая клавиша: " },
-  "palette_unavailable": { "message": "На этой странице палитру открыть нельзя (служебные страницы браузера недоступны)." },
-  "opt_title": { "message": "APS Vault — настройки" },
-  "opt_url_label": { "message": "Адрес vault" },
-  "opt_url_help": { "message": "Адрес вашего APS Vault, например https://vault.example.com. Попросите администратора добавить origin расширения (chrome-extension://<id>) в VAULT_ALLOWED_ORIGINS." },
-  "opt_autolock_label": { "message": "Автоблокировка через (минут)" },
-  "opt_save": { "message": "Сохранить" },
-  "opt_saved": { "message": "Сохранено" },
-  "opt_bad_url": { "message": "Адрес должен начинаться с https:// (http:// — только для localhost)" },
-  "opt_how": { "message": "Как это работает: разблокируйте vault из всплывающего окна мастер-паролем; расширение хранит сессию и подставляет логин, пароль и TOTP в формы, адрес которых совпадает с URL секрета. Ctrl/Cmd+Shift+L открывает палитру поиска на любой странице." },
-  "opt_extension_id": { "message": "Origin этого расширения (добавить в VAULT_ALLOWED_ORIGINS):" },
-  "cs_icon_title": { "message": "APS Vault: автозаполнение" },
-  "cs_no_matches": { "message": "Нет секретов для этого сайта — нажмите Ctrl/Cmd+Shift+L для поиска" },
-  "cs_filled": { "message": "Вставлено: $NAME$", "placeholders": { "name": { "content": "$1" } } },
-  "cs_error": { "message": "Ошибка: $MSG$", "placeholders": { "msg": { "content": "$1" } } },
-  "cs_vault_error": { "message": "Vault: $MSG$", "placeholders": { "msg": { "content": "$1" } } },
-  "cs_search_ph": { "message": "Поиск секрета… (Esc — закрыть)" },
-  "cs_copied": { "message": "$NAME$ в буфере (очистится через 30 с)", "placeholders": { "name": { "content": "$1" } } },
-  "cs_unlock_title": { "message": "Разблокировать APS Vault" },
-  "cs_unlocked": { "message": "Vault разблокирован" }
+  "ext_description": {
+    "message": "Автозаполнение учётных данных и TOTP-кодов из вашего APS Vault. Палитра поиска по Ctrl/Cmd+Shift+L."
+  },
+  "cmd_open_palette": {
+    "message": "Открыть поиск APS Vault"
+  },
+  "status_loading": {
+    "message": "…"
+  },
+  "status_no_url": {
+    "message": "Адрес vault не задан — откройте настройки расширения."
+  },
+  "status_not_initialized": {
+    "message": "Vault не инициализирован — сначала откройте его во вкладке."
+  },
+  "status_unlocked": {
+    "message": "Vault разблокирован"
+  },
+  "status_locked": {
+    "message": "Vault заблокирован"
+  },
+  "status_error": {
+    "message": "Ошибка: $MSG$",
+    "placeholders": {
+      "msg": {
+        "content": "$1"
+      }
+    }
+  },
+  "ph_master": {
+    "message": "Мастер-пароль"
+  },
+  "ph_totp": {
+    "message": "TOTP-код (если включена 2FA)"
+  },
+  "btn_unlock": {
+    "message": "Разблокировать"
+  },
+  "btn_palette": {
+    "message": "Открыть палитру"
+  },
+  "btn_open_vault": {
+    "message": "Открыть vault"
+  },
+  "btn_lock": {
+    "message": "Заблокировать"
+  },
+  "btn_options": {
+    "message": "Настройки"
+  },
+  "hint_hotkey": {
+    "message": "Горячая клавиша: "
+  },
+  "palette_unavailable": {
+    "message": "На этой странице палитру открыть нельзя (служебные страницы браузера недоступны)."
+  },
+  "opt_title": {
+    "message": "APS Vault — настройки"
+  },
+  "opt_url_label": {
+    "message": "Адрес vault"
+  },
+  "opt_url_help": {
+    "message": "Адрес вашего APS Vault, например https://vault.example.com. Попросите администратора добавить origin расширения (chrome-extension://<id>) в VAULT_ALLOWED_ORIGINS."
+  },
+  "opt_autolock_label": {
+    "message": "Автоблокировка через (минут)"
+  },
+  "opt_save": {
+    "message": "Сохранить"
+  },
+  "opt_saved": {
+    "message": "Сохранено"
+  },
+  "opt_bad_url": {
+    "message": "Адрес должен начинаться с https:// (http:// — только для localhost)"
+  },
+  "opt_how": {
+    "message": "Как это работает: разблокируйте vault из всплывающего окна мастер-паролем; расширение хранит сессию и подставляет логин, пароль и TOTP в формы, адрес которых совпадает с URL секрета. Ctrl/Cmd+Shift+L открывает палитру поиска на любой странице."
+  },
+  "opt_extension_id": {
+    "message": "Origin этого расширения (добавить в VAULT_ALLOWED_ORIGINS):"
+  },
+  "cs_icon_title": {
+    "message": "APS Vault: автозаполнение"
+  },
+  "cs_no_matches": {
+    "message": "Нет секретов для этого сайта — нажмите Ctrl/Cmd+Shift+L для поиска"
+  },
+  "cs_filled": {
+    "message": "Вставлено: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "cs_error": {
+    "message": "Ошибка: $MSG$",
+    "placeholders": {
+      "msg": {
+        "content": "$1"
+      }
+    }
+  },
+  "cs_vault_error": {
+    "message": "Vault: $MSG$",
+    "placeholders": {
+      "msg": {
+        "content": "$1"
+      }
+    }
+  },
+  "cs_search_ph": {
+    "message": "Поиск секрета… (Esc — закрыть)"
+  },
+  "cs_copied": {
+    "message": "$NAME$ в буфере (очистится через 30 с)",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "cs_unlock_title": {
+    "message": "Разблокировать APS Vault"
+  },
+  "cs_unlocked": {
+    "message": "Vault разблокирован"
+  },
+  "cs_locked_use_popup": {
+    "message": "APS Vault заблокирован — разблокируйте в окне расширения (значок на панели)"
+  },
+  "cs_https_only": {
+    "message": "Автозаполнение работает только на https-страницах"
+  },
+  "ph_search": {
+    "message": "Поиск секретов…"
+  },
+  "search_empty": {
+    "message": "Ничего не найдено"
+  },
+  "copied": {
+    "message": "Скопировано: $NAME$ (очистится через 30 с)",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  }
 }

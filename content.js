@@ -1,5 +1,8 @@
-// APS Vault — content script: autofill icon in password fields, search palette, unlock overlay.
-// Does nothing on the vault's own pages (the vault URL is read from the extension settings).
+// APS Vault — content script (0.3.0): the autofill icon in password fields and its dropdown, nothing else.
+// Everything the extension draws on a page lives in a CLOSED shadow root, so page scripts cannot read it through the
+// DOM. The master password is never asked for here (a page could read a field in its own DOM): when the vault is
+// locked the user is sent to the extension window. Values travel from the background only for secrets whose URL
+// matches this tab, and only into the page's own login fields.
 (() => {
   if (window.__APSV__) return;
   window.__APSV__ = true;
@@ -17,11 +20,20 @@
     });
   }
 
+  // one closed shadow host for everything we render
+  const host = document.createElement('apsv-root');
+  const shadow = host.attachShadow({ mode: 'closed' });
+  const style = document.createElement('style');
+  style.textContent = "/* APS Vault \u2014 content styles. \u0418\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0435\u043c \u0443\u043d\u0438\u043a\u0430\u043b\u044c\u043d\u044b\u0439 prefix apsv- \u0447\u0442\u043e\u0431\u044b \u043d\u0435 \u043a\u043e\u043d\u0444\u043b\u0438\u043a\u0442\u043e\u0432\u0430\u0442\u044c \u0441\u043e \u0441\u0442\u0438\u043b\u044f\u043c\u0438 \u0441\u0442\u0440\u0430\u043d\u0438\u0446. */\n\n.apsv-input-icon {\n  width: 24px;\n  height: 24px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: rgba(15, 19, 32, 0.92);\n  border: 1px solid #2a3149;\n  border-radius: 4px;\n  color: #94a3b8;\n  cursor: pointer;\n  transition: color .15s, border-color .15s;\n}\n.apsv-input-icon:hover {\n  color: #60a5fa;\n  border-color: #3b82f6;\n}\n\n.apsv-dropdown {\n  background: #0f1320;\n  border: 1px solid #1e2435;\n  border-radius: 8px;\n  padding: 4px;\n  max-height: 320px;\n  overflow-y: auto;\n  font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;\n  font-size: 13px;\n  box-shadow: 0 10px 40px rgba(0,0,0,.5);\n}\n.apsv-row {\n  padding: 8px 10px;\n  border-radius: 4px;\n  cursor: pointer;\n  color: #cbd5e1;\n}\n.apsv-row:hover {\n  background: #1a2138;\n  color: white;\n}\n.apsv-row-name {\n  font-weight: 600;\n  font-family: ui-monospace, \"SF Mono\", Menlo, monospace;\n  font-size: 12px;\n}\n.apsv-row-meta {\n  font-size: 11px;\n  color: #64748b;\n  margin-top: 2px;\n}\n.apsv-empty {\n  padding: 12px;\n  color: #64748b;\n  font-size: 12px;\n  text-align: center;\n}\n\n/* Toast */\n.apsv-toast {\n  position: fixed;\n  top: 16px;\n  right: 16px;\n  z-index: 2147483647;\n  padding: 10px 16px;\n  border-radius: 8px;\n  font-family: -apple-system, BlinkMacSystemFont, sans-serif;\n  font-size: 13px;\n  box-shadow: 0 8px 24px rgba(0,0,0,.4);\n  color: white;\n  background: #1e293b;\n  border: 1px solid #334155;\n}\n.apsv-toast-success { background: #064e3b; border-color: #047857; }\n.apsv-toast-error   { background: #7f1d1d; border-color: #991b1b; }\n\n";
+  shadow.appendChild(style);
+  function mount() { if (!host.isConnected) (document.body || document.documentElement).appendChild(host); }
+
   function toast(text, type = 'info') {
+    mount();
     const el = document.createElement('div');
     el.className = `apsv-toast apsv-toast-${type}`;
     el.textContent = text;
-    document.body.appendChild(el);
+    shadow.appendChild(el);
     setTimeout(() => el.remove(), 3000);
   }
 
@@ -40,15 +52,23 @@
     return e;
   }
 
-  const LOCK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+  const LOCK_PATH = [['rect', { x: 3, y: 11, width: 18, height: 11, rx: 2 }], ['path', { d: 'M7 11V7a5 5 0 0 1 10 0v4' }]];
+  function lockSvg() {
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    for (const [k, v] of Object.entries({ width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })) svg.setAttribute(k, v);
+    for (const [tag, attrs] of LOCK_PATH) { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); svg.appendChild(e); }
+    return svg;
+  }
 
   function attachIconTo(passInput) {
     if (passInput.__apsv_attached) return;
     passInput.__apsv_attached = true;
+    mount();
     const icon = document.createElement('div');
     icon.className = 'apsv-input-icon';
     icon.title = t('cs_icon_title');
-    icon.innerHTML = LOCK_SVG;   // static markup, no data
+    icon.appendChild(lockSvg());
     icon.style.position = 'absolute';
     icon.style.zIndex = '2147483646';
     function reposition() {
@@ -58,15 +78,17 @@
       icon.style.left = `${window.scrollX + r.right - 28}px`;
     }
     reposition();
-    document.body.appendChild(icon);
+    shadow.appendChild(icon);
     window.addEventListener('scroll', reposition, true);
     window.addEventListener('resize', reposition);
     icon.addEventListener('click', async (e) => {
       e.preventDefault(); e.stopPropagation();
-      try { showDropdown(passInput, await sendMsg({ type: 'matches-for-host', host: location.hostname })); }
+      try { showDropdown(passInput, await sendMsg({ type: 'matches-for-host' })); }
       catch (er) {
-        if (er.status === 401 || /locked/i.test(er.message)) showUnlockOverlay();
-        else toast(t('cs_vault_error', er.message), 'error');
+        if (er.status === 401 || /locked/i.test(er.message)) {
+          toast(t('cs_locked_use_popup'), 'error');          // never a password field in the page
+          sendMsg({ type: 'open-popup' }).catch(() => {});
+        } else toast(t('cs_vault_error', er.message), 'error');
       }
     });
   }
@@ -82,20 +104,20 @@
     closeDropdown();
     const dd = document.createElement('div');
     dd.className = 'apsv-dropdown';
-    if (!matches.length) dd.appendChild(htmlEl('div', { class: 'apsv-empty' }, t('cs_no_matches')));
+    if (!matches.length) dd.appendChild(htmlEl('div', { class: 'apsv-empty' }, location.protocol === 'https:' ? t('cs_no_matches') : t('cs_https_only')));
     for (const s of matches) {
       dd.appendChild(htmlEl('div', { class: 'apsv-row', onclick: () => autofillFrom(passInput, s) },
         htmlEl('div', { class: 'apsv-row-name' }, s.name),
-        htmlEl('div', { class: 'apsv-row-meta' }, [s.folder_name, s.tags].filter(Boolean).join(' · '))));
+        htmlEl('div', { class: 'apsv-row-meta' }, s.folder_name || '')));
     }
     const r = passInput.getBoundingClientRect();
     Object.assign(dd.style, { position: 'absolute', zIndex: '2147483647', top: `${window.scrollY + r.bottom + 4}px`,
                               left: `${window.scrollX + r.left}px`, minWidth: `${Math.max(r.width, 280)}px` });
-    document.body.appendChild(dd);
+    shadow.appendChild(dd);
     activeDropdown = dd;
     setTimeout(() => document.addEventListener('mousedown', onDocDown, { once: true, capture: true }), 0);
   }
-  function onDocDown(e) { if (activeDropdown && !activeDropdown.contains(e.target)) closeDropdown(); }
+  function onDocDown(e) { if (activeDropdown && e.target !== host) closeDropdown(); }
 
   // ── autofill ─────────────────────────────────────────────────────────────
   async function autofillFrom(passInput, secret) {
@@ -104,7 +126,6 @@
       const full = await sendMsg({ type: 'get', id: secret.id });
       setNativeValue(passInput, full.value);
       const form = passInput.closest('form') || document;
-      // login: the dedicated field first, then a "login: x" line in notes (older records)
       let login = full.login || '';
       if (!login && full.notes) {
         const m = /(?:login|user|username|email)\s*[:=]\s*([^\s\n]+)/i.exec(full.notes);
@@ -142,89 +163,6 @@
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('change', { bubbles: true }));
   }
-
-  // ── palette ──────────────────────────────────────────────────────────────
-  let paletteEl = null;
-  function closePalette() { paletteEl?.remove(); paletteEl = null; }
-  async function showPalette() {
-    closePalette();
-    let secrets;
-    try { secrets = await sendMsg({ type: 'list' }); }
-    catch (er) {
-      if (er.status === 401 || /locked/i.test(er.message)) { showUnlockOverlay(); return; }
-      toast(t('cs_vault_error', er.message), 'error'); return;
-    }
-    paletteEl = htmlEl('div', { class: 'apsv-palette-backdrop' });
-    const card = htmlEl('div', { class: 'apsv-palette-card' });
-    const input = htmlEl('input', { class: 'apsv-palette-input', type: 'text', placeholder: t('cs_search_ph') });
-    const list = htmlEl('div', { class: 'apsv-palette-list' });
-    card.append(input, list); paletteEl.appendChild(card); document.body.appendChild(paletteEl);
-    let idx = 0;
-    const score = (s, q) => {
-      const hay = `${s.name} ${s.tags} ${s.url} ${s.folder_name}`.toLowerCase();
-      if (s.name.toLowerCase().startsWith(q)) return 3;
-      return hay.includes(q) ? 2 : 0;
-    };
-    function refresh() {
-      const q = input.value.trim().toLowerCase();
-      const matches = q
-        ? secrets.map(s => ({ s, sc: score(s, q) })).filter(x => x.sc > 0).sort((a, b) => b.sc - a.sc).slice(0, 30).map(x => x.s)
-        : secrets.slice(0, 10);
-      idx = Math.min(Math.max(0, idx), Math.max(matches.length - 1, 0));
-      list.replaceChildren();
-      matches.forEach((s, i) => list.appendChild(htmlEl('div', {
-        class: 'apsv-palette-row' + (i === idx ? ' apsv-palette-row-sel' : ''),
-        onclick: async () => { await copyValue(s); closePalette(); },
-      }, htmlEl('div', { class: 'apsv-palette-name' }, s.name), htmlEl('div', { class: 'apsv-palette-meta' }, s.folder_name))));
-      paletteEl.__matches = matches;
-    }
-    input.addEventListener('input', refresh);
-    input.addEventListener('keydown', async (e) => {
-      const m = paletteEl?.__matches || [];
-      if (e.key === 'Escape') { closePalette(); return; }
-      if (e.key === 'ArrowDown') { e.preventDefault(); idx = Math.min(idx + 1, m.length - 1); refresh(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); idx = Math.max(idx - 1, 0); refresh(); }
-      else if (e.key === 'Enter' && m[idx]) { e.preventDefault(); await copyValue(m[idx]); closePalette(); }
-    });
-    paletteEl.addEventListener('click', (e) => { if (e.target === paletteEl) closePalette(); });
-    input.focus(); refresh();
-  }
-  async function copyValue(s) {
-    try {
-      const full = await sendMsg({ type: 'get', id: s.id });
-      await navigator.clipboard.writeText(full.value);
-      toast(t('cs_copied', s.name), 'success');
-      setTimeout(async () => {
-        try { if ((await navigator.clipboard.readText()) === full.value) await navigator.clipboard.writeText(''); } catch { /* no permission */ }
-      }, 30000);
-    } catch (er) { toast(t('cs_error', er.message), 'error'); }
-  }
-
-  // ── unlock overlay ───────────────────────────────────────────────────────
-  function showUnlockOverlay() {
-    closePalette();
-    const overlay = htmlEl('div', { class: 'apsv-palette-backdrop' });
-    const card = htmlEl('div', { class: 'apsv-palette-card', style: { maxWidth: '360px', padding: '16px' } });
-    const title = htmlEl('div', { class: 'apsv-palette-name', style: { fontSize: '14px', marginBottom: '8px' } }, t('cs_unlock_title'));
-    const mp = htmlEl('input', { type: 'password', class: 'apsv-palette-input', placeholder: t('ph_master') });
-    const totp = htmlEl('input', { type: 'text', class: 'apsv-palette-input', placeholder: t('ph_totp'), inputmode: 'numeric', style: { marginTop: '8px', display: 'none' } });
-    const btn = htmlEl('button', { class: 'apsv-palette-input', style: { marginTop: '12px', background: '#3b82f6', color: 'white', cursor: 'pointer', border: 'none' } }, t('btn_unlock'));
-    btn.addEventListener('click', async () => {
-      try {
-        await sendMsg({ type: 'unlock', password: mp.value, totp: totp.value || undefined });
-        overlay.remove(); toast(t('cs_unlocked'), 'success');
-      } catch (er) {
-        if (/2FA|totp/i.test(er.message)) { totp.style.display = 'block'; totp.focus(); }
-        toast(er.message, 'error');
-      }
-    });
-    for (const i of [mp, totp]) i.addEventListener('keydown', (e) => { if (e.key === 'Enter') btn.click(); });
-    card.append(title, mp, totp, btn); overlay.appendChild(card);
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-    document.body.appendChild(overlay); mp.focus();
-  }
-
-  chrome.runtime.onMessage.addListener((msg) => { if (msg.type === 'show-palette') showPalette(); });
 
   // Skip the vault's own UI; otherwise attach to password fields and watch for new ones.
   sendMsg({ type: 'config' }).then((cfg) => {

@@ -27,6 +27,7 @@ async function refresh() {
     if (h.unlocked) {
       setStatus(t('status_unlocked'), 'status-ok');
       $('form-unlock').style.display = 'none'; $('form-unlocked').style.display = 'block';
+      loadList(); setTimeout(() => $('search').focus(), 0);
     } else {
       setStatus(t('status_locked'), 'status-locked');
       $('form-unlock').style.display = 'block'; $('form-unlocked').style.display = 'none';
@@ -48,10 +49,42 @@ $('btn-unlock').addEventListener('click', async () => {
 });
 for (const id of ['mp', 'totp']) $(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-unlock').click(); });
 
-$('btn-palette').addEventListener('click', async () => {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  try { await chrome.tabs.sendMessage(tab.id, { type: 'show-palette' }); window.close(); }
-  catch { setStatus(t('palette_unavailable'), 'status-locked'); }
+// 0.3.0: the search palette — in the extension window; the value goes to the clipboard from here, the page never sees it
+let all = [], sel = 0;
+async function loadList() {
+  try { all = await sendMsg({ type: 'list' }); } catch (e) { all = []; setStatus(e.message, 'status-locked'); }
+  render();
+}
+function render() {
+  const q = $('search').value.trim().toLowerCase();
+  const score = (s) => !q ? 1 : s.name.toLowerCase().startsWith(q) ? 3 : `${s.name} ${s.tags || ''} ${s.url || ''} ${s.folder_name || ''}`.toLowerCase().includes(q) ? 2 : 0;
+  const shown = all.map(s => ({ s, sc: score(s) })).filter(x => x.sc > 0).sort((a, b) => b.sc - a.sc).slice(0, 30).map(x => x.s);
+  sel = Math.min(sel, Math.max(shown.length - 1, 0));
+  const box = $('results'); box.replaceChildren();
+  if (!shown.length) { const d = document.createElement('div'); d.className = 'empty'; d.textContent = t('search_empty'); box.appendChild(d); }
+  shown.forEach((s, i) => {
+    const row = document.createElement('div'); row.className = 'row' + (i === sel ? ' sel' : '');
+    const n = document.createElement('span'); n.textContent = s.name;
+    const m = document.createElement('span'); m.className = 'meta'; m.textContent = s.folder_name || '';
+    row.append(n, m); row.addEventListener('click', () => copy(s)); box.appendChild(row);
+  });
+  box.__shown = shown;
+}
+async function copy(s) {
+  try {
+    const full = await sendMsg({ type: 'get', id: s.id });
+    await navigator.clipboard.writeText(full.value);
+    setStatus(t('copied', s.name), 'status-ok');
+    const v = full.value;
+    setTimeout(async () => { try { if ((await navigator.clipboard.readText()) === v) await navigator.clipboard.writeText(''); } catch { /* popup closed */ } }, 30000);
+  } catch (e) { setStatus(e.message, 'status-locked'); }
+}
+$('search').addEventListener('input', () => { sel = 0; render(); });
+$('search').addEventListener('keydown', (e) => {
+  const shown = $('results').__shown || [];
+  if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(sel + 1, shown.length - 1); render(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); sel = Math.max(sel - 1, 0); render(); }
+  else if (e.key === 'Enter' && shown[sel]) { e.preventDefault(); copy(shown[sel]); }
 });
 $('btn-vault').addEventListener('click', async () => {
   const cfg = await sendMsg({ type: 'config' });
